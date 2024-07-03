@@ -11,7 +11,7 @@ pub struct RenameCommand {
 
 impl RenameCommand {
     pub fn run(&self) -> orfail::Result<()> {
-        let output_values = jsonl::values_from_stdin().map(|input_value| {
+        let output_values = jsonl::from_stdin().map(|input_value| {
             let mut value = input_value.or_fail()?;
             if let Value::Object(object) = value {
                 let object = object
@@ -25,7 +25,7 @@ impl RenameCommand {
             }
             Ok(value)
         });
-        jsonl::values_to_stdout(output_values).or_fail()?;
+        jsonl::to_stdout(output_values).or_fail()?;
         Ok(())
     }
 }

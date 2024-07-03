@@ -7,7 +7,7 @@ pub struct CountCommand {
 
 impl CountCommand {
     pub fn run(&self) -> orfail::Result<()> {
-        for result in jsonl::values_from_stdin() {
+        for result in jsonl::from_stdin() {
             let _value = result?;
         }
         Ok(())
