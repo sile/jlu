@@ -7,12 +7,13 @@ pub struct FlattenCommand {}
 
 impl FlattenCommand {
     pub fn run(&self) -> orfail::Result<()> {
-        for result in jsonl::read_from_stdin() {
-            let value = result?;
-            let mut output = Map::new();
-            self.flatten(value, "", &mut output);
-            jsonl::write_to_stdout(std::iter::once(Value::Object(output))).or_fail()?;
-        }
+        let output_values = jsonl::values_from_stdin().map(|input_value| {
+            let input_value = input_value.or_fail()?;
+            let mut flattened = Map::new();
+            self.flatten(input_value, "", &mut flattened);
+            Ok(Value::Object(flattened))
+        });
+        jsonl::values_to_stdout(output_values).or_fail()?;
         Ok(())
     }
 
