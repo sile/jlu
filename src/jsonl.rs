@@ -1,25 +1,22 @@
 use orfail::OrFail;
+use serde_json::Value;
 use std::io::Write;
 
-pub fn read_from_stdin<T>() -> impl Iterator<Item = orfail::Result<T>>
-where
-    T: serde::de::DeserializeOwned,
-{
+pub fn read_from_stdin() -> impl Iterator<Item = orfail::Result<Value>> {
     let stdin = std::io::stdin();
     let stdin = stdin.lock();
     serde_json::Deserializer::from_reader(stdin)
-        .into_iter::<T>()
+        .into_iter()
         .map(|result| result.or_fail())
 }
 
-pub fn write_to_stdout<T, I>(items: I) -> orfail::Result<()>
+pub fn write_to_stdout<I>(values: I) -> orfail::Result<()>
 where
-    T: serde::Serialize,
-    I: Iterator<Item = T>,
+    I: Iterator<Item = Value>,
 {
     let stdout = std::io::stdout();
     let mut stdout = stdout.lock();
-    for item in items {
+    for item in values {
         let json = serde_json::to_string(&item).or_fail()?;
         if ignore_broken_pipe(writeln!(&mut stdout, "{}", json)).or_fail()? {
             break;
