@@ -1,11 +1,14 @@
 use clap::Parser;
-use jlu::{command_count::CountCommand, command_flatten::FlattenCommand};
+use jlu::{
+    command_count::CountCommand, command_flatten::FlattenCommand, command_table::TableCommand,
+};
 use orfail::OrFail;
 
 #[derive(Parser)]
 enum Args {
     Count(CountCommand),
     Flatten(FlattenCommand),
+    Table(TableCommand),
 }
 
 fn main() -> orfail::Result<()> {
@@ -13,6 +16,7 @@ fn main() -> orfail::Result<()> {
     match args {
         Args::Count(c) => c.run().or_fail()?,
         Args::Flatten(c) => c.run().or_fail()?,
+        Args::Table(c) => c.run().or_fail()?,
     }
     Ok(())
 }
