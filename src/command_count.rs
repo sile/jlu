@@ -1,4 +1,4 @@
-use crate::jsonl;
+use crate::jsonl::{self, Object};
 use orfail::OrFail;
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -12,8 +12,8 @@ pub struct CountCommand {
 impl CountCommand {
     pub fn run(&self) -> orfail::Result<()> {
         let mut counter = Counter::new();
-        for result in jsonl::from_stdin() {
-            let value = result?;
+        for result in jsonl::from_stdin::<Object>() {
+            let value = Value::Object(result?);
             counter.increment(&mut self.names.iter(), &value);
         }
 

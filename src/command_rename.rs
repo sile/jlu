@@ -1,7 +1,6 @@
-use crate::jsonl;
+use crate::jsonl::{self, Object};
 use orfail::OrFail;
 use regex::Regex;
-use serde_json::Value;
 
 #[derive(Debug, clap::Args)]
 pub struct RenameCommand {
@@ -11,21 +10,18 @@ pub struct RenameCommand {
 
 impl RenameCommand {
     pub fn run(&self) -> orfail::Result<()> {
-        let output_values = jsonl::from_stdin().map(|input_value| {
-            let mut value = input_value.or_fail()?;
-            if let Value::Object(object) = value {
-                let object = object
+        let outputs = jsonl::from_stdin::<Object>().map(|input| {
+            input.map(|object| {
+                object
                     .into_iter()
                     .map(|(key, value)| {
                         let key = self.regex.replace_all(&key, &self.replacement).to_string();
                         (key, value)
                     })
-                    .collect();
-                value = Value::Object(object);
-            }
-            Ok(value)
+                    .collect::<Object>()
+            })
         });
-        jsonl::to_stdout(output_values).or_fail()?;
+        jsonl::to_stdout(outputs).or_fail()?;
         Ok(())
     }
 }

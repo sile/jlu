@@ -1,8 +1,14 @@
 use orfail::OrFail;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::io::Write;
 
-pub fn from_stdin() -> impl Iterator<Item = orfail::Result<Value>> {
+pub type Object = serde_json::Map<String, Value>;
+
+pub fn from_stdin<T>() -> impl Iterator<Item = orfail::Result<T>>
+where
+    T: for<'a> Deserialize<'a>,
+{
     let stdin = std::io::stdin();
     let stdin = stdin.lock();
     serde_json::Deserializer::from_reader(stdin)
@@ -10,7 +16,9 @@ pub fn from_stdin() -> impl Iterator<Item = orfail::Result<Value>> {
         .map(|result| result.or_fail())
 }
 
-pub fn to_stdout(values: impl Iterator<Item = orfail::Result<Value>>) -> orfail::Result<()> {
+pub fn to_stdout(
+    values: impl Iterator<Item = orfail::Result<impl Serialize>>,
+) -> orfail::Result<()> {
     let stdout = std::io::stdout();
     let mut stdout = stdout.lock();
     for value in values {
