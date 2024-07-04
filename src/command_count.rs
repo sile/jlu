@@ -2,7 +2,6 @@ use crate::jsonl::{self, Object};
 use orfail::OrFail;
 use serde_json::Value;
 use std::collections::BTreeMap;
-use std::io::Write;
 
 /// Read JSON objects from stdin and count the occurrences of the values associated with the specified top-level member names.
 #[derive(Debug, clap::Args)]
@@ -18,12 +17,7 @@ impl CountCommand {
             let value = Value::Object(result?);
             counter.increment(&mut self.names.iter(), &value);
         }
-
-        let stdout = std::io::stdout();
-        let mut stdout = stdout.lock();
-        serde_json::to_writer_pretty(&mut stdout, &counter).or_fail()?;
-        writeln!(&mut stdout).or_fail()?;
-
+        jsonl::to_stdout(std::iter::once(Ok(counter))).or_fail()?;
         Ok(())
     }
 }
