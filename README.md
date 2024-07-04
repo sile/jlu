@@ -37,7 +37,7 @@ In addition, pre-built binaries for Linux and MacOS are available in [the releas
 Command Examples
 ----------------
 
-### flatten
+### `$ jlu flatten`
 
 ```console
 $ jlu flatten --help
@@ -75,7 +75,7 @@ $ cat example0.json | jlu flatten | jq .
 
 Note that the following commands assume that the input JSON values are flat JSON objects.
 
-### names
+### `$ jlu names`
 
 ```console
 $ jlu names --help
@@ -95,7 +95,7 @@ $ cat example0.json | jlu flatten | jlu names
 "ccc.y"
 ```
 
-### rename
+### `$ jlu rename`
 
 ```console
 $ jlu rename --help
@@ -127,6 +127,6 @@ $ cat example0.json | jlu flatten | jlu rename '(.+)\.' '' | jq .
 }
 ```
 
-### count
+### `$ jlu count`
 
-### table
+### `$ jlu table`
