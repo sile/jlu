@@ -177,4 +177,11 @@ Options:
           Maximum number of characters to display in a column [default: 50]
   -h, --help
           Print help
+
+$ cat example1.json | jlu table level msg --sort level
+| level | msg          |
+|-------|--------------|
+| error | Hello Rust!  |
+| info  | Hello World! |
+| info  | Hello JSON!  |
 ```
