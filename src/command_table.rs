@@ -3,26 +3,34 @@ use orfail::OrFail;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+/// Read JSON objects from stdin and create a markdown table.
 #[derive(Debug, clap::Args)]
 pub struct TableCommand {
+    /// Names of object members to be included in the table.
+    pub column_names: Vec<String>,
+
+    /// If specified, the table rows are sorted based on the member value associated with this name.
+    #[clap(long, short)]
+    pub sort: Option<String>,
+
+    /// Maximum number of characters to display in a column.
     #[clap(long, short, default_value_t = 50)]
     pub max_column_chars: usize,
-    pub column_keys: Vec<String>,
 }
 
 impl TableCommand {
     pub fn run(&self) -> orfail::Result<()> {
         let mut columns = self
-            .column_keys
+            .column_names
             .iter()
-            .map(|key| Column::new(key))
+            .map(|name| Column::new(name))
             .collect::<Vec<_>>();
         let mut rows = Vec::new();
         for result in jsonl::from_stdin::<Object>() {
             let object = result.or_fail()?;
             let mut row = BTreeMap::new();
             for column in &mut columns {
-                let mut value = json_value_to_string(object.get(&column.key));
+                let mut value = json_value_to_string(object.get(&column.name));
                 if value.chars().count() > self.max_column_chars {
                     let (n, _) = value.char_indices().nth(self.max_column_chars).or_fail()?;
                     value.truncate(n);
@@ -30,19 +38,20 @@ impl TableCommand {
                 }
 
                 column.update_width(&value);
-                row.insert(column.key.clone(), value);
+                if let Some(sort_name) = &self.sort {
+                    row.insert(sort_name.clone(), value.clone());
+                }
+                row.insert(column.name.clone(), value);
             }
             rows.push(row);
         }
 
-        rows.sort_by(|x, y| {
-            let xs = columns.iter().map(|c| x.get(&c.key));
-            let ys = columns.iter().map(|c| y.get(&c.key));
-            xs.cmp(ys)
-        });
+        if let Some(sort_name) = &self.sort {
+            rows.sort_by(|x, y| x.get(sort_name).cmp(&y.get(sort_name)));
+        }
 
         for col in &columns {
-            print!("| {:<width$} ", col.key, width = col.width);
+            print!("| {:<width$} ", col.name, width = col.width);
         }
         println!("|");
 
@@ -54,7 +63,7 @@ impl TableCommand {
         let null = "".to_string();
         for row in rows {
             for col in &columns {
-                let value = row.get(&col.key).unwrap_or(&null);
+                let value = row.get(&col.name).unwrap_or(&null);
                 print!("| {:<width$} ", value, width = col.width);
             }
             println!("|");
@@ -66,14 +75,14 @@ impl TableCommand {
 
 #[derive(Debug)]
 struct Column {
-    key: String,
+    name: String,
     width: usize,
 }
 
 impl Column {
     fn new(key: &str) -> Self {
         Self {
-            key: key.to_owned(),
+            name: key.to_owned(),
             width: key.len(),
         }
     }

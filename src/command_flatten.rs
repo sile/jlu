@@ -2,6 +2,7 @@ use crate::jsonl;
 use orfail::OrFail;
 use serde_json::{Map, Value};
 
+/// Read JSON values from stdin and convert each value into a flattened JSON object.
 #[derive(Debug, clap::Args)]
 pub struct FlattenCommand {}
 

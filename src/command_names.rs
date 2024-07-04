@@ -2,6 +2,7 @@ use crate::jsonl::{self, Object};
 use orfail::OrFail;
 use std::collections::BTreeSet;
 
+/// Read JSON objects from stdin and output the unique member names for all top-level objects.
 #[derive(Debug, clap::Args)]
 pub struct NamesCommand {}
 

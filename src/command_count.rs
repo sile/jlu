@@ -4,8 +4,10 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 use std::io::Write;
 
+/// Read JSON objects from stdin and count the occurrences of the values associated with the specified top-level member names.
 #[derive(Debug, clap::Args)]
 pub struct CountCommand {
+    /// Names of the top-level members to count.
     pub names: Vec<String>,
 }
 
