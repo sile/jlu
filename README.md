@@ -5,8 +5,6 @@ jlu
 [![Actions Status](https://github.com/sile/jlu/workflows/CI/badge.svg)](https://github.com/sile/jlu/actions)
 ![License](https://img.shields.io/crates/l/jlu)
 
-Command-line utilities for on-the-fly investigation of JSON Lines.
-
 ```console
 $ jlu
 Command-line utilities for on-the-fly investigation of JSON Lines
@@ -39,12 +37,48 @@ In addition, pre-built binaries for Linux and MacOS are available in [the releas
 Command Examples
 ----------------
 
-### `$ jlu latten`
+### flatten
 
-### `$ jlu names`
+```console
+$ jlu flatten --help
+Read JSON values from stdin and convert each value into a flattened JSON object
 
-### `$ jlu rename`
+Usage: jlu flatten
 
-### `$ jlu count`
+Options:
+  -h, --help  Print help
 
-### `$ jlu table`
+$ jq . example0.json
+{
+  "aaa": 1,
+  "bbb": [
+    "a",
+    "b",
+    "c"
+  ],
+  "ccc": {
+    "x": 10,
+    "y": 20
+  }
+}
+
+$ cat example0.json | jlu flatten | jq .
+{
+  "aaa": 1,
+  "bbb[0]": "a",
+  "bbb[1]": "b",
+  "bbb[2]": "c",
+  "ccc.x": 10,
+  "ccc.y": 20
+}
+```
+
+Note that other commands assume that the input JSON values are flat JSON objects.
+
+### names
+
+### rename
+
+### count
+
+### table
