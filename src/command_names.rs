@@ -1,21 +1,18 @@
-use std::collections::BTreeMap;
-
 use crate::jsonl::{self, Object};
 use orfail::OrFail;
+use std::collections::BTreeSet;
 
 #[derive(Debug, clap::Args)]
 pub struct NamesCommand {}
 
 impl NamesCommand {
     pub fn run(&self) -> orfail::Result<()> {
-        let mut output = BTreeMap::new();
+        let mut outputs = BTreeSet::new();
         for input in jsonl::from_stdin::<Object>() {
             let object = input.or_fail()?;
-            for name in object.keys().cloned() {
-                *output.entry(name).or_insert(0) += 1;
-            }
+            outputs.extend(object.keys().cloned());
         }
-        jsonl::to_stdout(std::iter::once(Ok(output))).or_fail()?;
+        jsonl::to_stdout(outputs.into_iter().map(Ok)).or_fail()?;
         Ok(())
     }
 }
