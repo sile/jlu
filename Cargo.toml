@@ -2,6 +2,12 @@
 name = "jlu"
 version = "0.1.0"
 edition = "2021"
+authors = ["Takeru Ohta <phjgt308@gmail.com>"]
+license = "MIT"
+description = "Command-line utilities for on-the-fly investigation of JSON Lines"
+homepage = "https://github.com/sile/jlu"
+repository = "https://github.com/sile/jlu"
+readme = "README.md"
 
 [dependencies]
 clap = { version = "4.5.8", features = ["derive"] }
