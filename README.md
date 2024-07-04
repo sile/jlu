@@ -73,11 +73,59 @@ $ cat example0.json | jlu flatten | jq .
 }
 ```
 
-Note that other commands assume that the input JSON values are flat JSON objects.
+Note that the following commands assume that the input JSON values are flat JSON objects.
 
 ### names
 
+```console
+$ jlu names --help
+Read JSON objects from stdin and output the unique member names for all top-level objects
+
+Usage: jlu names
+
+Options:
+  -h, --help  Print help
+
+$ cat example0.json | jlu flatten | jlu names
+"aaa"
+"bbb[0]"
+"bbb[1]"
+"bbb[2]"
+"ccc.x"
+"ccc.y"
+```
+
 ### rename
+
+```console
+$ jlu rename --help
+Read JSON objects from stdin and rename top-level member names that match a regular expression with a replacement string.
+
+For details about regular expressions and replacement strings, please refer to the documentation of the regex crate: https://docs.rs/regex/latest/regex/struct.Regex.html#method.replace_all
+
+Usage: jlu rename <REGEX> <REPLACEMENT>
+
+Arguments:
+  <REGEX>
+          Regular expression to match top-level member names
+
+  <REPLACEMENT>
+          String to replace the matched segment of the member names
+
+Options:
+  -h, --help
+          Print help (see a summary with '-h')
+
+$ cat example0.json | jlu flatten | jlu rename '(.+)\.' '' | jq .
+{
+  "aaa": 1,
+  "bbb[0]": "a",
+  "bbb[1]": "b",
+  "bbb[2]": "c",
+  "x": 10,
+  "y": 20
+}
+```
 
 ### count
 
