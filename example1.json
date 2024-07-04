@@ -1,0 +1,3 @@
+{"level":"info","msg":"Hello World!"}
+{"level":"error","msg":"Hello Rust!"}
+{"level":"info","msg":"Hello JSON!"}
