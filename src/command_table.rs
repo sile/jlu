@@ -26,7 +26,8 @@ impl TableCommand {
             .map(|name| Column::new(name))
             .collect::<Vec<_>>();
         let mut rows = Vec::new();
-        for result in jsonl::from_stdin::<Object>() {
+        let mut sort_keys = Vec::new();
+        for (i, result) in jsonl::from_stdin::<Object>().enumerate() {
             let object = result.or_fail()?;
             let mut row = BTreeMap::new();
             for column in &mut columns {
@@ -38,16 +39,17 @@ impl TableCommand {
                 }
 
                 column.update_width(&value);
-                if let Some(sort_name) = &self.sort {
-                    row.insert(sort_name.clone(), value.clone());
-                }
                 row.insert(column.name.clone(), value);
             }
-            rows.push(row);
+            if let Some(name) = &self.sort {
+                let value = json_value_to_string(object.get(name));
+                sort_keys.push(value);
+            }
+            rows.push((i, row));
         }
 
-        if let Some(sort_name) = &self.sort {
-            rows.sort_by(|x, y| x.get(sort_name).cmp(&y.get(sort_name)));
+        if self.sort.is_some() {
+            rows.sort_by_key(|(i, _)| &sort_keys[*i]);
         }
 
         for col in &columns {
@@ -61,7 +63,7 @@ impl TableCommand {
         println!("|");
 
         let null = "".to_string();
-        for row in rows {
+        for (_, row) in rows {
             for col in &columns {
                 let value = row.get(&col.name).unwrap_or(&null);
                 print!("| {:<width$} ", value, width = col.width);
