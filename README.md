@@ -129,4 +129,52 @@ $ cat example0.json | jlu flatten | jlu rename '(.+)\.' '' | jq .
 
 ### `$ jlu count`
 
+```console
+$ jlu count --help
+Read JSON objects from stdin and count the occurrences of the values associated with the specified top-level member names
+
+Usage: jlu count [NAMES]...
+
+Arguments:
+  [NAMES]...  Names of the top-level members to count
+
+Options:
+  -h, --help  Print help
+
+$ cat example1.json
+{"level":"info","msg":"Hello World!"}
+{"level":"error","msg":"Hello Rust!"}
+{"level":"info","msg":"Hello JSON!"}
+
+$ cat example1.json | jlu count level | jq .
+{
+  "error": 1,
+  "info": 2
+}
+
+$ cat example1.json | jlu count level msg | jq .info
+{
+  "Hello JSON!": 1,
+  "Hello World!": 1
+}
+```
+
 ### `$ jlu table`
+
+```console
+$ jlu table --help
+Read JSON objects from stdin and create a markdown table
+
+Usage: jlu table [OPTIONS] [COLUMN_NAMES]...
+
+Arguments:
+  [COLUMN_NAMES]...  Names of object members to be included in the table
+
+Options:
+  -s, --sort <SORT>
+          If specified, the table rows are sorted based on the member value associated with this name
+  -m, --max-column-chars <MAX_COLUMN_CHARS>
+          Maximum number of characters to display in a column [default: 50]
+  -h, --help
+          Print help
+```
