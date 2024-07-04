@@ -6,6 +6,8 @@ use jlu::{
 use orfail::OrFail;
 
 #[derive(Parser)]
+#[clap(version)]
+/// Command-line utilities for on-the-fly investigation of JSON Lines.
 enum Args {
     Count(CountCommand),
     Flatten(FlattenCommand),
