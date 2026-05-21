@@ -37,20 +37,11 @@ jobs:
       - name: Install dependent packages
         run: sudo apt install -y musl-tools
 
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@b2417cde72dcf67f306c0ae8e0828a81bf0b189f # v1.0.6
-        with:
-          profile: minimal
-          toolchain: stable
-          target: x86_64-unknown-linux-musl
-          override: true
-
+      - run: rustup update stable
+      - run: rustup default stable
+      - run: rustup target add x86_64-unknown-linux-musl
       - name: Run cargo build
-        uses: actions-rs/cargo@ae10961054e4aa8b4aa7dffede299aaf087aa33b # v1.0.1
-        with:
-          command: build
-          args: --release --target=x86_64-unknown-linux-musl
-
+        run: cargo build --release --target=x86_64-unknown-linux-musl
       - uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,20 +62,11 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@b2417cde72dcf67f306c0ae8e0828a81bf0b189f # v1.0.6
-        with:
-          profile: minimal
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-
+      - run: rustup update stable
+      - run: rustup default stable
+      - run: rustup target add ${{ matrix.target }}
       - name: Run cargo build
-        uses: actions-rs/cargo@ae10961054e4aa8b4aa7dffede299aaf087aa33b # v1.0.1
-        with:
-          command: build
-          args: --release --target=${{ matrix.target }}
-
+        run: cargo build --release --target=${{ matrix.target }}
       - uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
