@@ -13,18 +13,20 @@ jobs:
       contents: write
     outputs:
       version: ${{ steps.get_version.outputs.VERSION }}
-      upload-url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
 
-      - id: create-release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
-        with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          name: v${{ steps.get_version.outputs.VERSION }}
-          draft: true
+      - name: Create Release Draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.get_version.outputs.VERSION }} \
+            --repo ${{ github.repository }} \
+            --title "v${{ steps.get_version.outputs.VERSION }}" \
+            --generate-notes \
+            --draft
 
   linux-binary:
     name: 'Upload Binary for Linux'
@@ -42,14 +44,14 @@ jobs:
       - run: rustup target add x86_64-unknown-linux-musl
       - name: Run cargo build
         run: cargo build --release --target=x86_64-unknown-linux-musl
-      - uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
+      - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.github-release-draft.outputs.upload-url }}
-          asset_path: target/x86_64-unknown-linux-musl/release/jlu
-          asset_name: jlu-${{ needs.github-release-draft.outputs.version }}.x86_64-unknown-linux-musl
-          asset_content_type: application/octet-stream
+        run: |
+          mv target/x86_64-unknown-linux-musl/release/jlu jlu-${{ needs.github-release-draft.outputs.version }}.x86_64-unknown-linux-musl
+          gh release upload ${{ needs.github-release-draft.outputs.version }} \
+            --repo ${{ github.repository }} \
+            jlu-${{ needs.github-release-draft.outputs.version }}.x86_64-unknown-linux-musl
 
   macos-binary:
     name: 'Upload Binary for MacOS'
@@ -67,11 +69,11 @@ jobs:
       - run: rustup target add ${{ matrix.target }}
       - name: Run cargo build
         run: cargo build --release --target=${{ matrix.target }}
-      - uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
+      - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.github-release-draft.outputs.upload-url }}
-          asset_path: target/${{ matrix.target }}/release/jlu
-          asset_name: jlu-${{ needs.github-release-draft.outputs.version }}.${{ matrix.target }}
-          asset_content_type: application/octet-stream
+        run: |
+          mv target/${{ matrix.target }}/release/jlu jlu-${{ needs.github-release-draft.outputs.version }}.${{ matrix.target }}
+          gh release upload ${{ needs.github-release-draft.outputs.version }} \
+            --repo ${{ github.repository }} \
+            jlu-${{ needs.github-release-draft.outputs.version }}.${{ matrix.target }}
